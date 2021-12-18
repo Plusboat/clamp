@@ -17,7 +17,7 @@
           "</Directory>": "",
           "servername": "{{$.address}}",
           "listen": "8080",
-          "documentroot": "'{{$cwd}}/app'",
+          "documentroot": "'{{$cwd}}'",
           "serverroot": "'{{$cwd}}'",
           "pidfile": "'{{$cwd}}/.clamp/tmp/httpd.pid'",
           "defaultruntimedir": "'{{$cwd}}/.clamp/tmp",
@@ -39,10 +39,8 @@
               "authz_host_module": "/opt/homebrew/lib/httpd/modules/mod_authz_host.so",
               "env_module": "/opt/homebrew/lib/httpd/modules/mod_env.so",
               "rewrite_module": "/opt/homebrew/lib/httpd/modules/mod_rewrite.so",
-              "unixd_module": "/opt/homebrew/lib/httpd/modules/mod_unixd.so",
-              "php_module": "/opt/homebrew/opt/php/lib/httpd/modules/libphp.so"
-          },
-          "php_admin_value": "{{$.php.options}}"
+              "unixd_module": "/opt/homebrew/lib/httpd/modules/mod_unixd.so"
+          }
       }
   },
   "mysql": {
