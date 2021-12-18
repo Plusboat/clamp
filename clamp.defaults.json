@@ -1,0 +1,80 @@
+{
+  "address": "localhost",
+  "memory": "1024M",
+  "database": "clamp",
+  "host": {
+    "options": {
+        "127.0.0.1": "{{$.address}}"
+    }
+  },
+  "apache": {
+      "commands": {
+          "httpd": "/opt/homebrew/bin/httpd"
+      },
+      "options": {
+          "<Directory": " '{{$cwd}}'>",
+          "AllowOverride": "All",
+          "</Directory>": "",
+          "servername": "{{$.address}}",
+          "listen": "8080",
+          "documentroot": "'{{$cwd}}/app'",
+          "serverroot": "'{{$cwd}}'",
+          "pidfile": "'{{$cwd}}/.clamp/tmp/httpd.pid'",
+          "defaultruntimedir": "'{{$cwd}}/.clamp/tmp",
+          "loglevel": "info",
+          "errorlog": "'{{$cwd}}/.clamp/logs/apache.error.log'",
+          "customlog": "'{{$cwd}}/.clamp/logs/apache.access.log' common",
+          "addtype": "application/x-httpd-php .php",
+          "directoryindex": "index.html index.php",
+          "setenv": "LOCAL_SERVER true",
+          "user": "`whoami`",
+          "autoopen": false,
+          "group": "_www",
+          "\" -C \"loadmodule mpm_prefork_module": "/opt/homebrew/lib/httpd/modules/mod_mpm_prefork.so",
+          "loadmodule": {
+              "log_config_module": "/opt/homebrew/lib/httpd/modules/mod_log_config.so",
+              "mime_module": "/opt/homebrew/lib/httpd/modules/mod_mime.so",
+              "dir_module": "/opt/homebrew/lib/httpd/modules/mod_dir.so",
+              "authz_core_module": "/opt/homebrew/lib/httpd/modules/mod_authz_core.so",
+              "authz_host_module": "/opt/homebrew/lib/httpd/modules/mod_authz_host.so",
+              "env_module": "/opt/homebrew/lib/httpd/modules/mod_env.so",
+              "rewrite_module": "/opt/homebrew/lib/httpd/modules/mod_rewrite.so",
+              "unixd_module": "/opt/homebrew/lib/httpd/modules/mod_unixd.so",
+              "php_module": "/opt/homebrew/opt/php/lib/httpd/modules/libphp.so"
+          },
+          "php_admin_value": "{{$.php.options}}"
+      }
+  },
+  "mysql": {
+      "commands": {
+          "mysql": "$(brew --prefix mariadb)/bin/mysql",
+          "mysqld": "$(brew --prefix mariadb)/bin/mysqld",
+          "mysqladmin": "$(brew --prefix mariadb)/bin/mysqladmin",
+          "mysqldump": "$(brew --prefix mariadb)/bin/mysqldump",
+          "mysql_install_db": "$(brew --prefix mariadb)/bin/mysql_install_db --auth-root-authentication-method=normal"
+      },
+      "databases": [
+          "{{$.database}}"
+      ],
+      "options": {
+          "bind-address": "127.0.0.1",
+          "port": "3306",
+          "lower_case_table_names": 2,
+          "basedir": "$(brew --prefix mariadb)",
+          "datadir": "'{{$cwd}}/.clamp/data'",
+          "socket": "'{{$cwd}}/.clamp/tmp/mysql.sock'",
+          "pid-file": "'{{$cwd}}/.clamp/tmp/mysql.pid'",
+          "log_error": "'{{$cwd}}/.clamp/logs/mysql.error.log'",
+          "max_binlog_size": "10M",
+          "max_allowed_packet": "32M"
+      }
+  },
+  "php": {
+      "options": {
+          "memory_limit": "{{$.memory}}",
+          "pdo_mysql.default_socket": "{{$.mysql.options.socket}}",
+          "mysql.default_socket": "{{$.mysql.options.socket}}",
+          "mysqli.default_socket": "{{$.mysql.options.socket}}"
+      }
+  }
+}

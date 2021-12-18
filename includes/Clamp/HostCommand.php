@@ -28,7 +28,7 @@ class HostCommand extends \Clamp\Command
     public function executeUnset(array $args = [], array $options = [])
     {
         $host_config = $this->getConfig('$.host.options');
-        $host = reset($this->getConfig($host_config));
+        $host = reset($host_config);
         if ($host != 'localhost') {
             if (shell_exec('grep -R "' . $this->buildParameters($options) . '" /etc/hosts')) {
                 exec('sudo sed -i "" -e "/' . preg_quote($this->buildParameters($options)) . '/d" /etc/hosts');
