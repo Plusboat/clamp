@@ -7,13 +7,13 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
- 
+
 namespace ConsoleKit;
 
-use Closure,
-    DirectoryIterator,
-    ReflectionFunction,
-    ReflectionMethod;
+use Closure;
+use DirectoryIterator;
+use ReflectionFunction;
+use ReflectionMethod;
 
 /**
  * Registry of available commands and command runner
@@ -36,7 +36,7 @@ class Console implements TextWriter
     protected $helpCommandClass = 'ConsoleKit\HelpCommand';
 
     /** @var array */
-    protected $commands = array();
+    protected $commands = [];
 
     /** @var string */
     protected $defaultCommand;
@@ -50,7 +50,7 @@ class Console implements TextWriter
     /**
      * @param array $commands
      */
-    public function __construct(array $commands = array(), OptionsParser $parser = null, TextWriter $writer = null)
+    public function __construct(array $commands = [], ?OptionsParser $parser = null, ?TextWriter $writer = null)
     {
         $this->optionsParser = $parser ?: new DefaultOptionsParser();
         $this->textWriter = $writer ?: new StdTextWriter();
@@ -118,7 +118,7 @@ class Console implements TextWriter
 
     /**
      * Sets whether a detailed error message is displayed when exception are caught
-     * 
+     *
      * @param boolean $enable
      */
     public function setVerboseException($enable = true)
@@ -148,10 +148,10 @@ class Console implements TextWriter
         }
         return $this;
     }
-    
+
     /**
      * Registers a command
-     * 
+     *
      * @param callback $callback Associated class name, function name, Command instance or closure
      * @param string $alias Command name to be used in the shell
      * @param bool $default True to set the command as the default one
@@ -160,12 +160,12 @@ class Console implements TextWriter
     public function addCommand($callback, $alias = null, $default = false)
     {
         if ($alias instanceof \Closure && is_string($callback)) {
-            list($alias, $callback) = array($callback, $alias);
+            list($alias, $callback) = [$callback, $alias];
         }
         if (is_array($callback) && is_string($callback[0])) {
             $callback = implode('::', $callback);
         }
-        
+
         $name = '';
         if (is_string($callback)) {
             $name = $callback;
@@ -182,7 +182,7 @@ class Console implements TextWriter
                 }
                 $name = Utils::dashized(basename(str_replace('\\', '/', $name)));
             }
-        } else if (is_object($callback) && !($callback instanceof Closure)) {
+        } elseif (is_object($callback) && !($callback instanceof Closure)) {
             $classname = get_class($callback);
             if (!($callback instanceof Command)) {
                 throw new ConsoleException("'$classname' must inherit from 'ConsoleKit\Command'");
@@ -191,8 +191,8 @@ class Console implements TextWriter
                 $classname = substr($classname, 0, -7);
             }
             $name = Utils::dashized(basename(str_replace('\\', '/', $classname)));
-        } else if (!$alias) {
-            throw new ConsoleException("Commands using closures must have an alias");
+        } elseif (!$alias) {
+            throw new ConsoleException('Commands using closures must have an alias');
         }
 
         $name = $alias ?: $name;
@@ -205,7 +205,7 @@ class Console implements TextWriter
 
     /**
      * Registers commands from a directory
-     * 
+     *
      * @param string $dir
      * @param string $namespace
      * @param bool $includeFiles
@@ -215,9 +215,9 @@ class Console implements TextWriter
     {
         foreach (new DirectoryIterator($dir) as $file) {
             $filename = $file->getFilename();
-            if ($file->isDir() || substr($filename, 0, 1) === '.' || strlen($filename) <= 11 
+            if ($file->isDir() || substr($filename, 0, 1) === '.' || strlen($filename) <= 11
                 || strtolower(substr($filename, -11)) !== 'command.php') {
-                    continue;
+                continue;
             }
             if ($includeFiles) {
                 include $file->getPathname();
@@ -283,39 +283,39 @@ class Console implements TextWriter
      * @param type $singleCommand
      * @return Console
      */
-    public function setSingleCommand($singleCommand) {
+    public function setSingleCommand($singleCommand)
+    {
         $this->singleCommand = $singleCommand;
         return $this;
     }
-    
+
     /**
      * @param array $args
      * @return mixed Results of the command callback
      */
-    public function run(array $argv = null)
+    public function run(?array $argv = null)
     {
         try {
             if ($argv === null) {
-                $argv = isset($_SERVER['argv']) ? array_slice($_SERVER['argv'], 1) : array();
+                $argv = isset($_SERVER['argv']) ? array_slice($_SERVER['argv'], 1) : [];
             }
 
             list($args, $options) = $this->getOptionsParser()->parse($argv);
-            if($this->defaultCommand && $this->singleCommand) {
+            if ($this->defaultCommand && $this->singleCommand) {
                 return $this->execute($this->defaultCommand, $args, $options);
             }
-            
+
             if (!count($args)) {
                 if ($this->defaultCommand) {
                     $args[] = $this->defaultCommand;
                 } else {
-                    $this->textWriter->writeln(Colors::red("Missing command name"));
+                    $this->textWriter->writeln(Colors::red('Missing command name'));
                     $args[] = $this->helpCommand;
                 }
             }
 
             $command = array_shift($args);
             return $this->execute($command, $args, $options);
-
         } catch (\Exception $e) {
             $this->writeException($e);
             if ($this->exitOnException) {
@@ -333,16 +333,16 @@ class Console implements TextWriter
      * @param array $options
      * @return mixed
      */
-    public function execute($command = null, array $args = array(), array $options = array())
+    public function execute($command = null, array $args = [], array $options = [])
     {
         $command = $command ?: $this->defaultCommand;
         if (!isset($this->commands[$command])) {
             throw new ConsoleException("Command '$command' does not exist");
         }
-        
+
         $callback = $this->commands[$command];
         if (is_callable($callback)) {
-            $params = array($args, $options);
+            $params = [$args, $options];
             if (is_string($callback)) {
                 if (strpos($callback, '::') !== false) {
                     list($classname, $methodname) = explode('::', $callback);
@@ -360,10 +360,10 @@ class Console implements TextWriter
         $params = Utils::computeFuncParams($method, $args, $options);
         return $method->invokeArgs(new $callback($this), $params);
     }
-    
+
     /**
      * Writes some text to the text writer
-     * 
+     *
      * @see TextWriter::write()
      * @param string $text
      * @param array $formatOptions
@@ -374,10 +374,10 @@ class Console implements TextWriter
         $this->textWriter->write($text, $pipe);
         return $this;
     }
-    
+
     /**
      * Writes a line of text
-     * 
+     *
      * @see TextWriter::writeln()
      * @param string $text
      * @param array $formatOptions
@@ -398,7 +398,8 @@ class Console implements TextWriter
     public function writeException(\Exception $e)
     {
         if ($this->verboseException) {
-            $text = sprintf("[%s]\n%s\nIn %s at line %s\n%s", 
+            $text = sprintf(
+                "[%s]\n%s\nIn %s at line %s\n%s",
                 get_class($e),
                 $e->getMessage(),
                 $e->getFile(),
@@ -411,7 +412,7 @@ class Console implements TextWriter
 
         $box = new Widgets\Box($this->textWriter, $text, '');
         $out = Colors::colorizeLines($box, Colors::WHITE, Colors::RED);
-        $out = TextFormater::apply($out, array('indent' => 2));
+        $out = TextFormater::apply($out, ['indent' => 2]);
         $this->textWriter->writeln($out);
         return $this;
     }
