@@ -10,8 +10,8 @@
 
 namespace ConsoleKit\Widgets;
 
-use ConsoleKit\TextWriter,
-    ConsoleKit\ConsoleException;
+use ConsoleKit\TextWriter;
+use ConsoleKit\ConsoleException;
 
 class Box extends AbstractWidget
 {
@@ -28,7 +28,7 @@ class Box extends AbstractWidget
      * @param TextWriter $writer
      * @param string $text
      */
-    public function __construct(TextWriter $writer = null, $text = '', $lineCharacter = '*', $padding = 2)
+    public function __construct(?TextWriter $writer = null, $text = '', $lineCharacter = '*', $padding = 2)
     {
         $this->textWriter = $writer;
         $this->text = $text;

@@ -70,7 +70,7 @@ class Checklist extends AbstractWidget
 
     public function run(array $steps)
     {
-        $maxMessageLength = min(array_reduce(array_keys($steps), function($r, $i) {
+        $maxMessageLength = min(array_reduce(array_keys($steps), function ($r, $i) {
             return max(strlen($i), $r);
         }, 0), $this->maxMessageLength);
 
@@ -81,9 +81,9 @@ class Checklist extends AbstractWidget
 
     public function runArray($array, $message, $callback, $useKeyInMessage = false)
     {
-        $steps = array();
+        $steps = [];
         foreach ($array as $k => $v) {
-            $steps[sprintf($message, $useKeyInMessage ? $k : $v)] = function() use ($k, $v) {
+            $steps[sprintf($message, $useKeyInMessage ? $k : $v)] = function () use ($k, $v) {
                 return $callback($v, $k);
             };
         }
@@ -93,7 +93,7 @@ class Checklist extends AbstractWidget
     public function step($message, $callback, $maxMessageLength = null)
     {
         $maxMessageLength = $maxMessageLength ?: $this->maxMessageLength;
-        $this->textWriter->write(sprintf("%-${maxMessageLength}s", $message));
+        $this->textWriter->write(sprintf("%-{$maxMessageLength}s", $message));
         if (call_user_func($callback)) {
             $this->textWriter->write(Colors::colorize($this->successText, $this->successColor));
         } else {

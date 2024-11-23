@@ -10,8 +10,8 @@
 
 namespace ConsoleKit\Widgets;
 
-use ConsoleKit\TextWriter,
-    ConsoleKit\ConsoleException;
+use ConsoleKit\TextWriter;
+use ConsoleKit\ConsoleException;
 
 /**
  * Progress bar
@@ -48,7 +48,7 @@ class ProgressBar extends AbstractWidget
      * @param int $total
      * @param int $size
      */
-    public function __construct(TextWriter $writer = null, $total = 100, $size = 50, $showRemainingTime = true)
+    public function __construct(?TextWriter $writer = null, $total = 100, $size = 50, $showRemainingTime = true)
     {
         $this->textWriter = $writer;
         $this->size = $size;
@@ -154,7 +154,7 @@ class ProgressBar extends AbstractWidget
         $progress = floor($percentage * $this->size);
         $output = "\r[" . str_repeat('=', $progress);
         if ($progress < $this->size) {
-            $output .= ">" . str_repeat(' ', $this->size - $progress);
+            $output .= '>' . str_repeat(' ', $this->size - $progress);
         } else {
             $output .= '=';
         }
